@@ -4,6 +4,9 @@
 #include <tuple>
 #include <vector>
 #include <algorithm>
+#include <random>
+#include <chrono>
+#include <sstream>
 
 #define TITLE 0
 #define BASE 12
@@ -74,10 +77,13 @@ std::string world_map[World_Map_X][World_Map_Y] = {
     };
 
 int roll(int min, int max){
-    std::default_random_engine generator;
+    // construct a trivial random generator engine from a time-based seed:
+    unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+    static std::default_random_engine generator (seed);
     std::uniform_int_distribution<int> distribution(min,max);
     return distribution(generator);
 }
+
 
 bool is_land(std::string world_map[World_Map_X][World_Map_Y]){ if(world_map[World_Map_X][World_Map_Y].front() != 'w'){return true;} else {return false;}}
 
@@ -253,6 +259,7 @@ void fHelp(){
     my_println("infrastructure   | i",12);
     my_println("science          | sci",12);
     my_println("activity         | a",12);
+    my_println("topology         | top",12);
 #elif linux
     cout << "quit             | q" << endl;
     cout << "help             | ?" << endl;
@@ -262,6 +269,7 @@ void fHelp(){
     cout << "infrastructure   | i" << endl;
     cout << "science          | sci" << endl;
     cout << "activity         | a" << endl;
+    cout << "topology         | top" << endl;
 #endif
     cout << "save             | sv" << endl;
     cout << "end              | x" << endl;
@@ -300,6 +308,26 @@ void my_exit(){
 #endif // _WIN32
 }
 
+/*
+* Print only bases and tiles as empty
+*/
+void print_topology_tile(std::string s){
+    if(s == "bb"){
+        my_printc('b', 12);
+    }
+    if(s.front() == 'f'){
+        my_printc(' ',14);
+    }else if (s.front() == 'p'){
+        my_printc(' ',15);
+    }else if (s.front() == 'w'){
+        my_printc(' ',13);
+    }else if (s.front() == 'h'){
+        my_printc(' ',16);
+    }else if (s.front() == 'r'){
+        //my_printc(s.back(),);
+    }
+}
+
 void print_tile(std::string s){
     // 0x1A = 0 = title
     // 0x04 = 12 = base
@@ -336,6 +364,16 @@ void print_tile(std::string s){
         //my_printc(s.back(),);
         }
     }
+}
+
+void print_topology_map(std::string world_map[World_Map_X][World_Map_Y]){
+    for(int i = 0; i < World_Map_X; i++){
+        for(int j = 0; j < World_Map_Y; j++){
+            print_topology_tile(world_map[i][j]);
+        }
+        std::cout << std::endl;
+    }
+    std::cout << std::endl;
 }
 
 void print_world_map(std::string world_map[World_Map_X][World_Map_Y], int x, int y){
@@ -467,6 +505,7 @@ int process_commands(){
         else if (command == "science"   || command == "sci"){ my_sci();}
         else if (command == "stats"     || command == "#"){my_stats();}
         else if (command == "activity"  || command == "a"){my_activities();}
+        else if (command == "topology"  || command == "top"){print_topology_map(world_map);}
         else {
             std::cout << "Invalid command." << std::endl;
         }
@@ -512,6 +551,23 @@ void process_player_improvements(){
 
 }
 
+void create_world(std::string world_map[World_Map_X][World_Map_Y]){
+    // spawn geography
+    int total_number_of_tiles = World_Map_X & World_Map_Y;
+    for(int i = 0; i < World_Map_X; i++){
+        for(int j = 0; j < World_Map_Y; j++){
+            int r = roll(1,10);
+            //std::cout << r << std::endl;
+            if(r <= 8){
+                if(r <= 4){
+                    world_map[i][j].erase(1,1);
+                    world_map[i][j].append((static_cast<std::ostringstream*>( &(std::ostringstream() << r-1) )->str()));
+                }
+            }
+        }
+    }
+}
+
 int main()
 {
 #ifdef _WIN32
@@ -551,6 +607,7 @@ int main()
     std::string tmp;
     std::cin >> tmp;
     display_prologue();
+    create_world(world_map);
     while(true){ // Each turn
         int ret = process_commands(); // Player makes the first move
         if(ret == 0){return 0;} // Lets player determine when to quit

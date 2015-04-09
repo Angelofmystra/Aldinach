@@ -1,10 +1,13 @@
 # depslib dependency file v1.0
-1428553813 source:c:\users\bertrand\documents\aldinach\aldinach\main.cpp
+1428597254 source:c:\users\bertrand\documents\aldinach\aldinach\main.cpp
 	<iostream>
 	<fstream>
 	<string>
 	<tuple>
 	<vector>
 	<algorithm>
+	<random>
+	<chrono>
+	<sstream>
 	<windows.h>
 
