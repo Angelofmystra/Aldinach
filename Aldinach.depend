@@ -1,0 +1,10 @@
+# depslib dependency file v1.0
+1428553813 source:c:\users\bertrand\documents\aldinach\aldinach\main.cpp
+	<iostream>
+	<fstream>
+	<string>
+	<tuple>
+	<vector>
+	<algorithm>
+	<windows.h>
+
