@@ -440,7 +440,7 @@ void my_expeditions(){
     cout << "Cadet Matthew Corbins\tPeon\tBuilding power plant\t2 days" << endl;
 }
 
-/* Forced to create a class to store related information together */
+/* Forced to create a struct to store related information together */
 struct Expedition {
   std::string who;
   int x;
@@ -452,12 +452,16 @@ struct Expedition {
 };
 
 void do_expedition(std::vector<Expedition>& expeditions, const std::string& who, int x, int y,
-                   const std::string& why, int duration,const std::string& how = "walking")
+                   const std::string& why, int duration, unsigned max_expeditions_allowed,const std::string& how = "walking")
 {
-  expeditions.emplace_back(Expedition{who,x,y,why,duration,how});
-  std::cout << who << " has gone on an expedition to " << x << "," << y
-            << "by " << how << " because they are " << why << " for "
-            << duration << " days." << std::endl;
+  if(expeditions.size() == max_expeditions_allowed){
+    std::cout << "The expedition cannot be performed because your base(s) cannot support any more simultaneous expeditions." << std::endl;
+  } else {
+    expeditions.emplace_back(Expedition{who,x,y,why,duration,how});
+    std::cout << who << " has gone on an expedition to " << x << "," << y
+              << "by " << how << " because they are " << why << " for "
+              << duration << " days." << std::endl;
+  }
 }
 
 void my_resources(){
