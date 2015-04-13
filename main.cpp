@@ -621,7 +621,7 @@ void modify_tile_content(std::string world_map[World_Map_X][World_Map_Y], int i,
 
 void create_world(std::string world_map[World_Map_X][World_Map_Y]){
     // spawn geography
-    int total_number_of_tiles = World_Map_X & World_Map_Y;
+    int total_number_of_tiles = World_Map_X * World_Map_Y;
     std::cout << total_number_of_tiles << std::endl; // TODO to remove warning.
     for(int i = 0; i < World_Map_X; i++){
         for(int j = 0; j < World_Map_Y; j++){
@@ -705,6 +705,8 @@ int main()
     std::cin >> tmp;
     display_prologue();
     create_world(world_map);
+    // 0,0 is the top left corner. x,y is swapped. So x goes up or down. y goes left or right.
+
     //do_expedition(expeditions, "scientist", 1,1,"investigating native lifeforms",3);
 	//do_expedition(expeditions, "engineer", 1,2,"constructing power supply",2);
 	//do_expedition(expeditions, "soldier", 2,3,"securing territory",1);
