@@ -7,7 +7,9 @@
 #include <random>
 #include <chrono>
 #include <sstream>
-
+#include <list>
+#include <memory>
+//#include <boost/regex.hpp>
 #define TITLE 0
 #define BASE 12
 #define WATER 13
@@ -48,7 +50,26 @@ const int World_Map_Y = 36; // yes, y is where x should be... odd...
  C = colonist base
  N = native base
 
+ Insights
+ + Always use pass by reference for strongs and containers passed as function parameters
+ + Improve my spacing
+ +
+
 */
+
+/*void myfunc(){
+    std::string line;
+    boost::regex pat( "^Subject: (Re: |Aw: )*(.*)" );
+
+    while (std::cin)
+    {
+        std::getline(std::cin, line);
+        boost::smatch matches;
+        if (boost::regex_match(line, matches, pat))
+            std::cout << matches[2] << std::endl;
+    }
+}*/
+
 std::string world_map[World_Map_X][World_Map_Y] = {
     {"pe", "he", "he","pe", "pe", "fe","pe", "he", "he","we", "pe", "fe","we", "we", "we","we", "we", "fe","fe", "fe", "he","we", "pe", "fe","pe", "pe", "pe","pe", "pe", "fe","pe", "he", "he","we", "fe", "fe"},
     {"pe", "pe", "he","he", "fe", "fw","pe", "he", "he","we", "pe", "we","we", "we", "we","we", "we", "fe","fe", "he", "he","we", "pe", "fe","pe", "he", "he","pe", "pe", "fe","pe", "he", "he","fe", "fe", "fe"},
@@ -106,6 +127,7 @@ void generate_world_map(std::string world_map[World_Map_X][World_Map_Y], int x, 
             int w = q / 100;
             int amount_of_land_of_world = w*percent_of_land_of_world;
             int amount_of_desert_of_land = (amount_of_land_of_world/100)*percent_of_desert_of_land;
+            std::cout << amount_of_desert_of_land << std::endl; // TODO to remove warning.
         }else if(number_of_continents == 2){
 
         }else if(number_of_continents == 3){
@@ -362,6 +384,9 @@ void print_tile(std::string s){
             my_printc(s.back(),16);
         }else if (s.front() == 'r'){
         //my_printc(s.back(),);
+        /* MONSTERS */
+        }else if (s.back() == 'T'){
+
         }
     }
 }
@@ -400,6 +425,39 @@ void my_team(){
     cout << "Cadet\t\tThe Jay Man\tMad Scientist\t1\t0\t0,0\tJolly" << endl;
     cout << "Cadet\t\tCarlos\t\tDrama Queen\t1\t0\t0,0\tFeeling ignored" << endl;
     cout << endl;
+}
+
+
+
+void my_expeditions(){
+    using namespace std;
+#ifdef WIN32
+    my_println("\t\t\t\t EXPEDITIONS:\t\t\t\t", 0);
+#endif
+    cout << "Character\t\tRole\tCurrent Activity\tTime Remaining" << endl;
+    cout << "---------\t\t----\t----------------\t--------------" << endl;
+    cout << "Lance-Corporal Paul Massey\tSecurity\tFortifying outpost\tOn-going" << endl;
+    cout << "Cadet Matthew Corbins\tPeon\tBuilding power plant\t2 days" << endl;
+}
+
+/* Forced to create a class to store related information together */
+struct Expedition {
+  std::string who;
+  int x;
+  int y;
+  std::string why;
+  int duration;
+  std::string how;
+  //Expedition(std::string who, int x, int y, std::string why, int duration, std::string how) : who(who), x(x), y(y), how(how), why(why), duration(duration){ }
+};
+
+void do_expedition(std::vector<Expedition>& expeditions, const std::string& who, int x, int y,
+                   const std::string& why, int duration,const std::string& how = "walking")
+{
+  expeditions.emplace_back(Expedition{who,x,y,why,duration,how});
+  std::cout << who << " has gone on an expedition to " << x << "," << y
+            << "by " << how << " because they are " << why << " for "
+            << duration << " days." << std::endl;
 }
 
 void my_resources(){
@@ -506,6 +564,8 @@ int process_commands(){
         else if (command == "stats"     || command == "#"){my_stats();}
         else if (command == "activity"  || command == "a"){my_activities();}
         else if (command == "topology"  || command == "top"){print_topology_map(world_map);}
+        else if (command == "expeditions" || command == "exp"){my_expeditions();}
+        else if (command == "job" || command == "j"){ }
         else {
             std::cout << "Invalid command." << std::endl;
         }
@@ -551,19 +611,51 @@ void process_player_improvements(){
 
 }
 
+void modify_tile_content(std::string world_map[World_Map_X][World_Map_Y], int i, int j, std::string new_content){
+    world_map[i][j].erase(1,1); world_map[i][j].append(new_content);
+}
+
 void create_world(std::string world_map[World_Map_X][World_Map_Y]){
     // spawn geography
     int total_number_of_tiles = World_Map_X & World_Map_Y;
+    std::cout << total_number_of_tiles << std::endl; // TODO to remove warning.
     for(int i = 0; i < World_Map_X; i++){
         for(int j = 0; j < World_Map_Y; j++){
-            int r = roll(1,10);
-            //std::cout << r << std::endl;
-            if(r <= 8){
-                if(r <= 4){
-                    world_map[i][j].erase(1,1);
-                    world_map[i][j].append((static_cast<std::ostringstream*>( &(std::ostringstream() << r-1) )->str()));
+            int r = roll(1,100);
+            if(world_map[i][j] == "bb"){/* do nothing */} else {
+                if(world_map[i][j].front() == 'w'){/* do nothing */ } else {
+                    /* GENERATE LAND MOBS */
+                    if(r == 1){modify_tile_content(world_map, i,j,"Z");} // Progenitor
+                    if(r == 2){modify_tile_content(world_map, i,j,"X");} // Pre-Human Nuclear Vault
+                    if(r == 3){modify_tile_content(world_map, i,j,"V");} //
+                    if(r == 4){modify_tile_content(world_map, i,j,"J");} //
+                    if(r == 5){modify_tile_content(world_map, i,j,"Y");} //
+                    if(r == 6){modify_tile_content(world_map, i,j,"W");} //
+                    if(r >= 7  && r <= 20){modify_tile_content(world_map, i,j," ");} // empty tile
+                    if(r >= 21 && r <= 21){modify_tile_content(world_map, i,j,"M");} // big monster
+                    //22-25
+                    if(r >= 26 && r <= 26){modify_tile_content(world_map, i,j,"T");} // tyrant
+                    //27-30
+                    if(r >= 31 && r <= 31){modify_tile_content(world_map, i,j,"O");} // big monster
+                    //32-35
+                    if(r >= 36 && r <= 45){modify_tile_content(world_map, i,j,"a");} // small mob
+                    //46-55
+                    //if(r >= 46 && r <= 55){modify_tile_content(world_map, i,j,"e");} // small mob
+                    if(r >= 56 && r <= 65){modify_tile_content(world_map, i,j,"i");} // small mob
+                    if(r >= 66 && r <= 75){modify_tile_content(world_map, i,j,"o");} // small mob
+                    if(r >= 76 && r <= 85){modify_tile_content(world_map, i,j,"u");} // small mob
+                    if(r >= 86 && r <= 95){modify_tile_content(world_map, i,j,"f");} // small mob, flier
+                    //96-99
+                    if(r >= 100 && r <= 100){modify_tile_content(world_map, i,j,"F");} // big mob, flier
                 }
             }
+            //std::cout << r << std::endl;
+            //if(r <= 8){
+            //    if(r <= 4){
+            //        world_map[i][j].erase(1,1);
+            //        world_map[i][j].append((static_cast<std::ostringstream*>( &(std::ostringstream() << r-1) )->str()));
+            //    }
+            //}
         }
     }
 }
@@ -589,6 +681,7 @@ int main()
     my_println("\t\t\t\t Welcome to Aldinach \t\t\t\t", 0);
 
 #endif // _WIN32
+    std::vector<Expedition> expeditions;
     print_skull();
     std::cout << "By what name do you wish to be mourned? ";
     std::string name;
@@ -608,6 +701,9 @@ int main()
     std::cin >> tmp;
     display_prologue();
     create_world(world_map);
+    //do_expedition(expeditions, "scientist", 1,1,"investigating native lifeforms",3);
+	//do_expedition(expeditions, "engineer", 1,2,"constructing power supply",2);
+	//do_expedition(expeditions, "soldier", 2,3,"securing territory",1);
     while(true){ // Each turn
         int ret = process_commands(); // Player makes the first move
         if(ret == 0){return 0;} // Lets player determine when to quit
